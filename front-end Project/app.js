@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const latestData = data[data.length - 1];
             const humidityPercentage = latestData.humedadAmbiente;
             const humidityFloorPercentage = latestData.humedadSuelo;
-            createProgress(humidityPercentage, "Humedad Ambiente", "humidityProgressContainer");
-            createProgress(humidityFloorPercentage, "Humedad del suelo", "humidityFloorProgressContainer");
+            createProgress(humidityPercentage, "Humedad Ambiente", "humidityProgressContainer","#DEF7C2", "#86CC3C");
+            createProgress(humidityFloorPercentage, "Humedad del suelo", "humidityFloorProgressContainer", "#C4C6A6", "#5E610B");
 
             // Llama a una función para crear el gráfico con Chart.js
             createChart(labels, temperatureData);
@@ -39,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function createChart(labels, temperatureData) {
+    const borderColors = temperatureData.map(temp => {
+        if (temp <= 15) {
+            return '#3B97E8';
+        } else if (temp < 30) {
+            return '#86CC3C';
+        } else {
+            return '#E24A15';
+        }
+    });
     const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
@@ -47,9 +56,12 @@ function createChart(labels, temperatureData) {
             datasets: [{
                 label: 'Temperatura',
                 data: temperatureData,
-                borderColor: 'rgb(75, 192, 192)',
-                borderWidth: 2,
-                fill: true,
+                borderColor: "#9F9F9F",
+                borderWidth: 1,
+                fill: false,
+                pointBorderColor: borderColors,
+                pointBackgroundColor: borderColors,
+                pointRadius: 5,
             }],
         },
         options: {
@@ -87,13 +99,13 @@ function createChart(labels, temperatureData) {
     });
 }
 
-function createProgress(humidityPercentage, title, containerID) {
+function createProgress(humidityPercentage, title, containerID, colorIni, colorFin) {
     const container = document.getElementById(containerID);
 
     // Crea una instancia de la barra de progreso semicircular
     const humidityBar = new ProgressBar.SemiCircle(container, {
         strokeWidth: 8, // Ancho de la línea de la barra
-        color: '#77dd77', // Color de la barra de progreso
+        color: colorIni, // Color de la barra de progreso
         trailColor: '#eee', // Color de fondo de la barra
         trailWidth: 2, // Ancho de la línea de fondo
         easing: 'easeInOut', // Efecto de animación
@@ -106,8 +118,8 @@ function createProgress(humidityPercentage, title, containerID) {
             value: `${humidityPercentage}%`, // Valor de texto (porcentaje)
             className: 'progressbar-text', // Clase para aplicar estilo al texto
         },
-        from: { color: '#d8f8e1' },
-        to: { color: '#77dd77' },
+        from: { color: colorIni },
+        to: { color: colorFin },
         step: (state, bar) => {
             bar.path.setAttribute('stroke', state.color);
             const value = Math.round(bar.value() * 100);
